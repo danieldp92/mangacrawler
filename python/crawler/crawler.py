@@ -36,13 +36,14 @@ class MangaCrawler(ABC):
         user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
         return user_agent
 
-    def download_and_save(self, name=None, chapter=None, dest=os.getcwd()):
+    def download_and_save(self, name=None, chapter=None, overwrite=False, dest=os.getcwd()):
         """
         Download ana save a single chapter
         :param name: the name of the manga
         :param chapter: the chapter to dowload
+        :param overwrite: true, if the content must be overwritten
         :param dest: the output folder
-        :return: Nothing
+        :return: True, if the chapter has been downloaded, False otherwise
         """
 
         if name is None:
@@ -54,6 +55,10 @@ class MangaCrawler(ABC):
         # Create manga chapter folder
         chapter_folder_name = name + " - Chapter " + str(chapter)
         chapter_dir = os.path.join(dest, chapter_folder_name)
+
+        if os.path.exists(chapter_dir) and not overwrite:
+            return False
+
         if not os.path.exists(chapter_dir):
             os.mkdir(chapter_dir)
 
@@ -90,6 +95,8 @@ class MangaCrawler(ABC):
                 f.write(data)
 
         print("\nDownload completed")
+
+        return True
 
     @abstractmethod
     def get_name(self):

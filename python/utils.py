@@ -36,3 +36,32 @@ def image_validator(img):
         else:
             img = img.convert("L")
     return img
+
+
+def chapter_validator(chapters):
+    if not isinstance(chapters, list):
+        raise Exception("Invalid chapter param type")
+
+    new_chapters = []
+    for chapter in chapters:
+        if "-" in chapter:
+            chapters_split = chapter.split("-")
+            if len(chapters_split) != 2:
+                raise Exception("Invalid multi-chapter selection used. Use the following formula -> "
+                                "startchapter-endchapter (es 1-100)")
+
+            start_chapter = int(chapters_split[0])
+            end_chapter = int(chapters_split[1])
+
+            if end_chapter < start_chapter:
+                raise Exception("Invalid multi-chapter selection used. The endchapter must be greater or equal to the "
+                                "startchapter")
+
+            for single_chapter in range(start_chapter, end_chapter+1):
+                # If it is not an integer, an exception will be thrown
+                new_chapters.append(single_chapter)
+        else:
+            chapter = int(chapter)
+            new_chapters.append(chapter)
+
+    return new_chapters

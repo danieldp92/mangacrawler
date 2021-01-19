@@ -12,9 +12,9 @@ mangaworld_archive = "https://www.mangaworld.cc/archive"
 
 
 class MangaworldCrawler(MangaCrawler):
-    def download_and_save(self, name=None, chapter=None, dest=os.getcwd()):
+    def download_and_save(self, name=None, chapter=None, overwrite=False, dest=os.getcwd()):
         self.url = self.remove_page_url(self.url)
-        super().download_and_save(name=name, chapter=chapter, dest=dest)
+        return super().download_and_save(name=name, chapter=chapter, overwrite=overwrite, dest=dest)
 
     def get_name(self):
         if self.url is None:
@@ -116,7 +116,7 @@ def crawl_chapter_dict(url):
     return chapters
 
 
-def download_all(name, chapter=None, all=False, dest=os.getcwd()):
+def download_all(name, chapter=None, all=False, overwrite=False, dest=os.getcwd()):
     if name is None:
         print("Invalid name!!!")
         return
@@ -177,7 +177,10 @@ def download_all(name, chapter=None, all=False, dest=os.getcwd()):
 
         for chapter_dict in chapters:
             crawler = MangaworldCrawler(chapter_dict["url"])
-            crawler.download_and_save(name=name, chapter=chapter_dict["chapter_number"], dest=manga_dir)
+            saved = crawler.download_and_save(name=name, chapter=chapter_dict["chapter_number"], overwrite=overwrite,
+                                              dest=manga_dir)
+            if not saved:
+                print("Chapter {} skipped (already in the selected folder)".format(chapter_dict["chapter_number"]))
             print("------------------------------------------------------")
     else:
         if chapter:
@@ -188,7 +191,9 @@ def download_all(name, chapter=None, all=False, dest=os.getcwd()):
                 return
 
             crawler = MangaworldCrawler(chapter_dict["url"])
-            crawler.download_and_save(name=name, chapter=str(chapter), dest=dest)
+            saved = crawler.download_and_save(name=name, chapter=str(chapter), overwrite=overwrite, dest=dest)
+            if not saved:
+                print("Chapter {} skipped (already in the selected folder)".format(str(chapter)))
         else:
             last_chapter = max(chapters, key=lambda x: x['chapter_number'])
             print("Last scan detected: Chapter {}\n".format(last_chapter["chapter_number"]))
@@ -196,4 +201,7 @@ def download_all(name, chapter=None, all=False, dest=os.getcwd()):
 
             if choice.lower() == "y":
                 crawler = MangaworldCrawler(last_chapter["url"])
-                crawler.download_and_save(name=name, chapter=last_chapter["chapter_number"], dest=dest)
+                saved = crawler.download_and_save(name=name, chapter=last_chapter["chapter_number"],
+                                                  overwrite=overwrite, dest=dest)
+                if not saved:
+                    print("Chapter {} skipped (already in the selected folder)".format(last_chapter["chapter_number"]))
